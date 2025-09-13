@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Надіслати в Telegram</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2rem; max-width: 600px; margin: auto; }
+    textarea { width: 100%; height: 140px; padding: .5rem; font-size: 1rem; }
+    button { padding: .6rem 1rem; font-size: 1rem; margin-top: .5rem; }
+    .status { margin-top: .7rem; }
+  </style>
+</head>
+<body>
+  <h1>Надіслати повідомлення в Telegram</h1>
+  <form id="sendForm">
+    <label for="msg">Текст:</label><br/>
+    <textarea id="msg" name="msg" placeholder="Напиши щось..."></textarea><br/>
+    <button type="submit">Відправити</button>
+  </form>
+
+  <div class="status" id="status"></div>
+
+  <script>
+    const form = document.getElementById('sendForm');
+    const status = document.getElementById('status');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.textContent = 'Надсилаю...';
+      const text = document.getElementById('msg').value;
+
+      try {
+        const resp = await fetch('/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+
+        const data = await resp.json();
+        if (resp.ok && data.ok) {
+          status.textContent = 'Повідомлення надіслано ✅';
+          document.getElementById('msg').value = '';
+        } else {
+          console.error(data);
+          status.textContent = 'Помилка: ' + (data.error || 'не відомо');
+        }
+      } catch (err) {
+        console.error(err);
+        status.textContent = 'Помилка мережі або сервера';
+      }
+    });
+  </script>
+</body>
+</html>
